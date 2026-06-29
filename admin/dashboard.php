@@ -18,9 +18,8 @@ $d_admin = mysqli_fetch_assoc($q_admin);
 $admin_id = $d_admin['id'];
 $admin_username = $d_admin['username'];
 
-// ==========================================
+
 // PROSES AJAX UPDATE PROFIL (USERNAME & PASSWORD)
-// ==========================================
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_profile') {
     header('Content-Type: application/json');
     $new_username = mysqli_real_escape_string($conn, trim($_POST['username']));
@@ -43,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
             echo json_encode(['status' => 'error', 'message' => 'Konfirmasi password baru tidak cocok.']);
             exit;
         }
-        $password_fix = md5($password_baru); // Sesuaikan metode enkripsi (md5, bcrypt, atau polos)
+        $password_fix = md5($password_baru); 
         $update_query = "UPDATE users SET username = '$new_username', password = '$password_fix' WHERE id = '$admin_id'";
     } else {
         $update_query = "UPDATE users SET username = '$new_username' WHERE id = '$admin_id'";
@@ -57,9 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     exit;
 }
 
-// ==========================================
 // 1. PROSES AKSI HAPUS (DELETE)
-// ==========================================
 if (isset($_GET['action']) && $_GET['action'] == 'delete') {
     $id = mysqli_real_escape_string($conn, $_GET['id']);
     
@@ -84,9 +81,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete') {
     exit();
 }
 
-// ==========================================
 // 2. PROSES AKSI TAMBAH (CREATE) & EDIT (UPDATE)
-// ==========================================
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['action'])) {
     
     // --- KELAS ---
@@ -112,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['action'])) {
         $jam_selesai = mysqli_real_escape_string($conn, $_POST['jam_selesai']);
         
         mysqli_query($conn, "INSERT INTO jadwal_kuliah (mata_kuliah_id, dosen_id, kelas_id, hari, jam_mulai, jam_selesai) 
-                             VALUES ('$matkul_id', '$dosen_id', '$kelas_id', '$hari', '$jam_mulai', '$jam_selesai')");
+                            VALUES ('$matkul_id', '$dosen_id', '$kelas_id', '$hari', '$jam_mulai', '$jam_selesai')");
         header("location:dashboard.php?page=jadwal&msg=success"); exit();
     }
     if (isset($_POST['edit_jadwal'])) {
@@ -146,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && !isset($_POST['action'])) {
         $user_id = mysqli_insert_id($conn);
         
         $query = "INSERT INTO mahasiswa (user_id, nim, nama_lengkap, program_studi, angkatan, kelas_id) 
-                  VALUES ('$user_id', '$nim', '$nama', '$prodi', '$angkatan', '$kelas_id')";
+                VALUES ('$user_id', '$nim', '$nama', '$prodi', '$angkatan', '$kelas_id')";
         if(mysqli_query($conn, $query)) { header("location:dashboard.php?page=mahasiswa&msg=success"); exit(); } 
         else { mysqli_query($conn, "DELETE FROM users WHERE id='$user_id'"); }
     }
@@ -231,7 +226,7 @@ $jml_jdw = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM jadwal_kuliah"));
     
     <style>
         body {
-            background-color: #f4f6f9; /* Abu-abu sangat terang dan bersih */
+            background-color: #f4f6f9; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             color: #333;
         }
@@ -748,7 +743,6 @@ $jml_jdw = mysqli_num_rows(mysqli_query($conn, "SELECT id FROM jadwal_kuliah"));
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Fitur AJAX Update Profil Khusus Menu Pengaturan Admin
         const formProfile = document.getElementById('form-update-profile');
         if (formProfile) {
             formProfile.addEventListener('submit', function(e) {

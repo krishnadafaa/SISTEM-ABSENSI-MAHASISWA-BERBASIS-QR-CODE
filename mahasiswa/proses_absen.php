@@ -1,7 +1,7 @@
 <?php
 session_start();
 date_default_timezone_set('Asia/Makassar');
-error_reporting(0); // Mencegah PHP membocorkan teks warning yang bisa merusak format JSON
+error_reporting(0); 
 include '../config/database.php';
 
 header('Content-Type: application/json');
@@ -25,9 +25,8 @@ if(isset($_POST['kode_sesi']) && isset($_SESSION['mahasiswa_id'])) {
         $sesi_id = $sesi['id'];
         $jadwal_id = $sesi['jadwal_id'];
         
-        // ==========================================
+        
         // 2. VALIDASI KELAS
-        // ==========================================
         $q_mhs = mysqli_query($conn, "SELECT kelas_id FROM mahasiswa WHERE id='$mahasiswa_id'");
         $d_mhs = mysqli_fetch_assoc($q_mhs);
         
@@ -39,7 +38,6 @@ if(isset($_POST['kode_sesi']) && isset($_SESSION['mahasiswa_id'])) {
             echo json_encode(['status' => 'error', 'message' => 'Akses Ditolak! Kamu terdeteksi menscan QR Code milik kelas atau jadwal yang berbeda.']);
             exit(); 
         }
-        // ==========================================
 
         // 3. Cek Batas Waktu
         if(strtotime($sesi['waktu_berakhir']) < time()) {

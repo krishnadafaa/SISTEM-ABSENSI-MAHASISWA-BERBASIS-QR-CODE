@@ -23,7 +23,7 @@ $username_dosen = $d_profil['username'];
 
 // 2. Handle POST Request untuk update profil (Disimpan ke tabel users)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'update_profile') {
-    error_reporting(0); // Matikan error agar JSON tidak rusak
+    error_reporting(0); 
     header('Content-Type: application/json');
     $new_username = mysqli_real_escape_string($conn, trim($_POST['username']));
     $password_baru = trim($_POST['password_baru']);
@@ -60,12 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     exit;
 }
 
-// ==============================================================
 // 3. PROSES CRUD JADWAL KULIAH (HANYA MILIK DOSEN YANG LOGIN)
-// ==============================================================
 if (isset($_GET['action']) && $_GET['action'] == 'delete_jadwal') {
     $id = mysqli_real_escape_string($conn, $_GET['id']);
-    // Filter ketat: Pastikan jadwal yang dihapus benar-benar milik dosen_id ini
     mysqli_query($conn, "DELETE FROM jadwal_kuliah WHERE id='$id' AND dosen_id='$dosen_id'");
     header("location:dashboard.php?msg=jadwal_deleted"); exit();
 }
@@ -78,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tambah_jadwal'])) {
     $jam_selesai = mysqli_real_escape_string($conn, $_POST['jam_selesai']);
 
     mysqli_query($conn, "INSERT INTO jadwal_kuliah (mata_kuliah_id, dosen_id, kelas_id, hari, jam_mulai, jam_selesai) 
-                         VALUES ('$matkul', '$dosen_id', '$kelas', '$hari', '$jam_mulai', '$jam_selesai')");
+                        VALUES ('$matkul', '$dosen_id', '$kelas', '$hari', '$jam_mulai', '$jam_selesai')");
     header("location:dashboard.php?msg=jadwal_success"); exit();
 }
 
@@ -90,14 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_jadwal'])) {
     $jam_mulai = mysqli_real_escape_string($conn, $_POST['jam_mulai']);
     $jam_selesai = mysqli_real_escape_string($conn, $_POST['jam_selesai']);
 
-    // Filter ketat: Hanya bisa update jika jadwal adalah milik dosen_id ini
+    
     mysqli_query($conn, "UPDATE jadwal_kuliah SET mata_kuliah_id='$matkul', kelas_id='$kelas', hari='$hari', jam_mulai='$jam_mulai', jam_selesai='$jam_selesai' WHERE id='$id' AND dosen_id='$dosen_id'");
     header("location:dashboard.php?msg=jadwal_updated"); exit();
 }
 
-// ==============================================================
 // 4. PROSES SESI ABSENSI
-// ==============================================================
 if(isset($_POST['buka_sesi'])) {
     $jadwal_id = mysqli_real_escape_string($conn, $_POST['jadwal_id']);
     $topik = mysqli_real_escape_string($conn, $_POST['topik']);
