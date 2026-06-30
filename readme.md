@@ -68,4 +68,4 @@ ABSENSI/
 │   └── proses_absen.php   # API Backend penangan validasi token, kelas, waktu, dan double-scan
 ├── auth.php               # Autentikasi dan manajemen sesi multi-role
 ├── index.php              # Halaman utama (Login interface)
-└── setting.php            # Konfigurasi parameter sistem
+└── setting.php            # Setting Profile
