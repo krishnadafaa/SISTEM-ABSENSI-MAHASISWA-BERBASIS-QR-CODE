@@ -226,9 +226,133 @@ $sesi_aktif = mysqli_fetch_assoc($q_aktif);
             <div class="tab-content" id="dashboardTabsContent">
                 
                 <div class="tab-pane fade" id="home" role="tabpanel">
-                    <h4 class="fw-bold text-dark mb-4">Selamat Datang, <?php echo $_SESSION['nama_lengkap']; ?></h4>
-                    <div class="card p-4 bg-white border-0 shadow-sm">
-                        <p class="text-muted mb-0">Halaman beranda dosen. Anda bisa menambahkan ringkasan jadwal mengajar hari ini di sini nantinya.</p>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="fw-bold text-dark mb-1">Beranda Dashboard</h4>
+                            <p class="text-muted mb-0">Selamat datang, <?php echo $_SESSION['nama_lengkap']; ?></p>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-primary bg-opacity-10 text-primary p-2 px-3 rounded-pill border border-primary">
+                                <i class="bi bi-calendar-event me-1"></i> 
+                                <?php 
+                                    $hari_indo = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                                    $hari_ini = $hari_indo[date('l')];
+                                    echo $hari_ini . ", " . date('d M Y'); 
+                                ?>
+                            </span>
+                        </div>
+                    </div>
+
+                    <?php
+                    // Ambil Data Statistik Cepat
+                    $q_tot_jadwal = mysqli_query($conn, "SELECT COUNT(*) as total FROM jadwal_kuliah WHERE dosen_id = '$dosen_id'");
+                    $tot_jadwal = mysqli_fetch_assoc($q_tot_jadwal)['total'];
+
+                    $q_tot_sesi = mysqli_query($conn, "SELECT COUNT(*) as total FROM sesi_absensi sa JOIN jadwal_kuliah jk ON sa.jadwal_id = jk.id WHERE jk.dosen_id = '$dosen_id'");
+                    $tot_sesi = mysqli_fetch_assoc($q_tot_sesi)['total'];
+
+                    $q_jadwal_hari_ini = mysqli_query($conn, "SELECT j.*, m.nama_mk, k.nama_kelas FROM jadwal_kuliah j JOIN mata_kuliah m ON j.mata_kuliah_id = m.id JOIN kelas k ON j.kelas_id = k.id WHERE j.dosen_id = '$dosen_id' AND j.hari = '$hari_ini' ORDER BY j.jam_mulai ASC");
+                    $jml_hari_ini = mysqli_num_rows($q_jadwal_hari_ini);
+                    ?>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary bg-gradient text-white overflow-hidden position-relative">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-normal mb-1 opacity-75">Jadwal Mengajar Hari Ini</h6>
+                                    <h2 class="fw-bold mb-0"><?php echo $jml_hari_ini; ?> <span class="fs-6 fw-normal">Kelas</span></h2>
+                                </div>
+                                <i class="bi bi-calendar2-check position-absolute opacity-25" style="font-size: 5rem; right: -10px; bottom: -15px;"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white position-relative">
+                                <div class="card-body p-4 d-flex align-items-center">
+                                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                        <i class="bi bi-journal-bookmark-fill fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-muted fw-normal mb-1">Total Mata Kuliah/Jadwal</h6>
+                                        <h3 class="fw-bold text-dark mb-0"><?php echo $tot_jadwal; ?></h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white position-relative">
+                                <div class="card-body p-4 d-flex align-items-center">
+                                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                        <i class="bi bi-broadcast fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="text-muted fw-normal mb-1">Total Sesi Pernah Dibuka</h6>
+                                        <h3 class="fw-bold text-dark mb-0"><?php echo $tot_sesi; ?></h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-8 mb-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-primary me-2"></i> Jadwal Mengajar Anda Hari Ini</h6>
+                                </div>
+                                <div class="card-body p-4">
+                                    <?php if($jml_hari_ini > 0): ?>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-light text-muted small">
+                                                    <tr>
+                                                        <th class="py-2 rounded-start">Waktu</th>
+                                                        <th class="py-2">Mata Kuliah</th>
+                                                        <th class="py-2 rounded-end">Kelas</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php while($jadwal = mysqli_fetch_assoc($q_jadwal_hari_ini)): ?>
+                                                    <tr>
+                                                        <td class="fw-semibold text-primary">
+                                                            <i class="bi bi-clock me-1 small"></i> <?php echo date('H:i', strtotime($jadwal['jam_mulai'])) . " - " . date('H:i', strtotime($jadwal['jam_selesai'])); ?>
+                                                        </td>
+                                                        <td class="fw-bold text-dark"><?php echo $jadwal['nama_mk']; ?></td>
+                                                        <td><span class="badge bg-light text-dark border"><i class="bi bi-door-open"></i> Kelas <?php echo $jadwal['nama_kelas']; ?></span></td>
+                                                    </tr>
+                                                    <?php endwhile; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="text-center py-4">
+                                            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                                <i class="bi bi-cup-hot text-muted fs-2"></i>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">Tidak ada jadwal kelas hari ini.</h6>
+                                            <p class="text-muted small mb-0">Selamat menikmati waktu luang atau persiapan materi Anda.</p>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 mb-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 bg-dark text-white p-4 position-relative overflow-hidden">
+                                <div class="position-relative" style="z-index: 2;">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <i class="bi bi-lightning-charge-fill text-warning fs-3 me-2"></i>
+                                        <h5 class="fw-bold mb-0">Quick Action</h5>
+                                    </div>
+                                    <p class="small text-white-50 mb-4">Ingin segera memulai kelas? Langsung buka sesi absensi QR Code Anda sekarang juga.</p>
+                                    
+                                    <button onclick="document.getElementById('mulai-tab').click();" class="btn btn-warning fw-bold w-100 rounded-3 py-2 shadow">
+                                        <i class="bi bi-play-circle-fill me-1"></i> Buka Sesi Kelas
+                                    </button>
+                                </div>
+                                <div class="position-absolute bg-white opacity-10 rounded-circle" style="width: 150px; height: 150px; top: -50px; right: -50px;"></div>
+                                <div class="position-absolute bg-white opacity-10 rounded-circle" style="width: 100px; height: 100px; bottom: -20px; right: 20px;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -509,6 +633,13 @@ $sesi_aktif = mysqli_fetch_assoc($q_aktif);
                                     </h2>
                                     <div id="'.$collapse_id.'" class="accordion-collapse collapse" aria-labelledby="'.$heading_id.'" data-bs-parent="#accordionRekap">
                                         <div class="accordion-body bg-light p-4">
+                                            
+                                            <div class="d-flex justify-content-end mb-3">
+                                                <a href="cetak_rekap.php?sesi_id='.$sesi['id'].'" target="_blank" class="btn btn-sm btn-danger rounded-3 px-3 shadow-sm">
+                                                    <i class="bi bi-file-earmark-pdf-fill me-1"></i> Cetak PDF Sesi Ini
+                                                </a>
+                                            </div>
+
                                             <div class="table-responsive bg-white rounded-3 shadow-sm border">
                                                 <table class="table table-hover mb-0 align-middle">
                                                     <thead class="table-light text-muted small">
@@ -548,10 +679,12 @@ $sesi_aktif = mysqli_fetch_assoc($q_aktif);
                                                                 <td class="text-center font-monospace text-muted">'.$waktu.'</td>
                                                                 <td class="text-center">'.$badge.'</td>
                                                             </tr>';
+                                                            
                                                         }
                                                     } else {
                                                         echo '<tr><td colspan="4" class="text-center text-muted py-4">Belum ada data mahasiswa di kelas ini.</td></tr>';
                                                     }
+                                                    
 
                                 echo '              </tbody>
                                                 </table>
